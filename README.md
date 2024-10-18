@@ -5,7 +5,7 @@ Userscript (wootility.user.js) created by [Netux](https://github.com/netux).
 
 # Usage
 Download or copy the contents of [wootility.user.js](https://github.com/Provoxin/WootilityCustomRGB/blob/main/wootility.user.js) into a userscript extension, such as [Violentmonkey](https://violentmonkey.github.io/) or [Tampermonkey](https://www.tampermonkey.net/).
-Go to [the Wootility site](https://wootility.io), open the console with F12 or ctrl+shift+i, paste the contents of [setRGB.js](https://github.com/Provoxin/WootilityCustomRGB/blob/main/setRGB.js) into it, and press Enter.
+Go to [the Wootility site](https://wootility.io), open the console with F12 or ctrl+shift+i, paste the contents of [setRGB.min.js](https://github.com/Provoxin/WootilityCustomRGB/blob/main/setRGB.min.js) into it, and press Enter.
 The default function creates a rainbow gradient across the board.
 To use a custom function, create a function named `RGBFunction(keyPos, matrixPos)` in the console. It must return a dict containing values for `red`, `green`, and `blue`.
 The arguments to the function will give you
