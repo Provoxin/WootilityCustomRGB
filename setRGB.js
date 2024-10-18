@@ -20,34 +20,37 @@ catch (error)
     else { throw error; }
 }
 
-var ogColorArray = colorProfile.kbdArray;
-if (typeof onboardColorArray === "undefined")
+function elementCenter(element)
 {
-    onboardColorArray = ogColorArray;
+    let rect = element.getBoundingClientRect();
+    return { x: rect.left + rect.width/2,
+             y: rect.top + rect.height/2 };
 }
-colorProfile.kbdArray = window.createLayoutArray();
-var matrix = window.getDeviceMatrix(activeDevice.device.keyboardType); // use matrix.columns and matrix.rows to get number of cols and rows
-var rgbMap = window.getKeyLayoutReference(activeDevice.device.keyboardType,  // which row,col intersections have addressable rgb
-                                            await activeDevice.device.getlayoutType(),
-                                            "rgb");
 
-var keysArray = [];
-document.querySelectorAll(".keyRender").forEach((k) => { keysArray.push(k) });  // we need this as an array, not a NodeList, to do .map on it
-var furthestLeft =   Math.min(...keysArray.map((k) => { return elementCenter(k).x; }));
-var furthestRight =  Math.max(...keysArray.map((k) => { return elementCenter(k).x; }));
-var furthestTop =    Math.min(...keysArray.map((k) => { return elementCenter(k).y; }));
-var furthestBottom = Math.max(...keysArray.map((k) => { return elementCenter(k).y; }));
+var keyElements = Array.from(document.querySelectorAll(".keyRender"));  // we need this as an array, not a NodeList, to do .map on it
+
+var furthestLeft   = Math.min(...keyElements.map((k) => { return elementCenter(k).x; }));
+var furthestRight  = Math.max(...keyElements.map((k) => { return elementCenter(k).x; }));
+var furthestTop    = Math.min(...keyElements.map((k) => { return elementCenter(k).y; }));
+var furthestBottom = Math.max(...keyElements.map((k) => { return elementCenter(k).y; }));
+
 var kbOffset = { x: furthestLeft, y: furthestTop };
 var kbSize = { x: furthestRight - furthestLeft,
                y: furthestBottom - furthestTop };
 
 var rowElements = document.querySelector(".chakra-stack[dir='ltr']").children; 
-function elementCenter(element)
+
+var ogColorArray = colorProfile.kbdArray;
+if (typeof onboardColorArray === "undefined")
 {
-    let rect = element.getBoundingClientRect();
-    return { x: ((rect.left + rect.right) / 2),
-             y: ((rect.top + rect.bottom) / 2) };
+    var onboardColorArray = ogColorArray;
 }
+
+colorProfile.kbdArray = window.createLayoutArray();
+var matrix = window.getDeviceMatrix(activeDevice.device.keyboardType);  // use matrix.columns and matrix.rows to get number of cols and rows
+var rgbMap = window.getKeyLayoutReference(activeDevice.device.keyboardType,  // which row,col intersections have addressable rgb
+                                            await activeDevice.device.getlayoutType(),
+                                            "rgb");
 
 if (typeof RGBFunction === "function") { var chosenFunction = RGBFunction; }
 else
@@ -55,6 +58,7 @@ else
     var chosenFunction = threeColorGradient;
     console.warn(`No custom function defined - using preset "${chosenFunction.name}"`)
 }
+
 for (let row = 0, elementNumber = 0; row < matrix.rows; row++, elementNumber = 0)
 {
     for (let col = 0; col < matrix.columns; col++)
@@ -62,8 +66,8 @@ for (let row = 0, elementNumber = 0; row < matrix.rows; row++, elementNumber = 0
         if (rgbMap[row][col] === null) { continue; }  // current row,col isn't addressable
         let key = rowElements[row].children[elementNumber].children[0].children[0];
         if (key === undefined) { break; }  // we've colored all keys in this row
-        keyPos = { x: (elementCenter(key).x - kbOffset.x) / kbSize.x,
-                   y: (elementCenter(key).y - kbOffset.y) / kbSize.y };
+        let keyPos = { x: (elementCenter(key).x - kbOffset.x) / kbSize.x,
+                       y: (elementCenter(key).y - kbOffset.y) / kbSize.y };
         
         try { colorProfile.kbdArray[row][col] = roundRGB(chosenFunction(keyPos, { row: row, column: col })); }
         catch (error)
